@@ -1,0 +1,222 @@
+package Energy_Renewable_Management;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.Random;
+
+// EnvironmentalData class representing simulated environmental conditions
+class EnvironmentalData {
+    private double sunlightIntensity;
+    private double windSpeed;
+
+    public EnvironmentalData(double sunlightIntensity, double windSpeed) {
+        this.sunlightIntensity = sunlightIntensity;
+        this.windSpeed = windSpeed;
+    }
+
+    public double getSunlightIntensity() {
+        return sunlightIntensity;
+    }
+
+    public double getWindSpeed() {
+        return windSpeed;
+    }
+}
+
+// SolarPanel class with enhanced features and error handling
+class SolarPanel {
+    private double efficiency;
+    private double capacity;
+    private double currentPowerOutput;
+
+    public SolarPanel(double efficiency, double capacity) {
+        this.efficiency = efficiency;
+        this.capacity = capacity;
+        this.currentPowerOutput = 0.0;
+    }
+
+    // Getter and setter methods
+
+    // Simulate power calculation based on sunlight intensity
+    public void updatePowerOutput(double sunlightIntensity) {
+        if (sunlightIntensity < 0 || sunlightIntensity > 1) {
+            throw new IllegalArgumentException("Sunlight intensity should be between 0 and 1.");
+        }
+
+        this.currentPowerOutput = efficiency * capacity * sunlightIntensity;
+    }
+
+    public double getCurrentPowerOutput() {
+        return currentPowerOutput;
+    }
+}
+
+// WindTurbine class with enhanced features and error handling
+class WindTurbine {
+    private double bladeLength;
+    private double currentPowerOutput;
+
+    public WindTurbine(double bladeLength) {
+        this.bladeLength = bladeLength;
+        this.currentPowerOutput = 0.0;
+    }
+
+    // Getter and setter methods
+
+    // Simulate power calculation based on wind speed
+    public void updatePowerOutput(double windSpeed) {
+        if (windSpeed < 0) {
+            throw new IllegalArgumentException("Wind speed should be a non-negative value.");
+        }
+
+        this.currentPowerOutput = 0.5 * bladeLength * bladeLength * windSpeed * windSpeed;
+    }
+
+    public double getCurrentPowerOutput() {
+        return currentPowerOutput;
+    }
+}
+
+// EnergyStorage class to simulate energy storage
+class EnergyStorage {
+    private double capacity;
+    private double storedEnergy;
+
+    public EnergyStorage(double capacity) {
+        this.capacity = capacity;
+        this.storedEnergy = 0.0;
+    }
+
+    // Getter and setter methods
+
+    // Store excess energy in the storage
+    public void storeEnergy(double excessEnergy) {
+        storedEnergy += excessEnergy;
+    }
+
+    // Consume stored energy
+    public void consumeEnergy(double consumption) {
+        if (consumption > storedEnergy) {
+            storedEnergy = 0;
+        } else {
+            storedEnergy -= consumption;
+        }
+    }
+
+    public double getStoredEnergy() {
+        return storedEnergy;
+    }
+}
+
+// Main Application class with advanced features, error handling, and GUI
+public class RenewableEnergyManagementSystemWithGUI {
+    private static SolarPanel solarPanel;
+    private static WindTurbine windTurbine;
+    private static EnergyStorage energyStorage;
+    private static JLabel statusLabel;
+
+    public static void main(String[] args) {
+        // Initialize environmental data and components
+        EnvironmentalData environmentalData = generateEnvironmentalData();
+        solarPanel = new SolarPanel(0.20, 100.0); // 20% efficiency, 100 kW capacity
+        windTurbine = new WindTurbine(20.0); // 20-meter blade length
+        energyStorage = new EnergyStorage(500.0); // 500 kWh storage capacity
+
+        // Create GUI
+        createGUI();
+
+        // Set up a timer to update the GUI every second
+        Timer timer = new Timer(1000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                updateSystem();
+                displaySystemStatus();
+            }
+        });
+        timer.start();
+    }
+
+    private static void createGUI() {
+        JFrame frame = new JFrame("Renewable Energy Management System");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setLayout(new BorderLayout());
+
+        JPanel panel = new JPanel(new GridLayout(3, 2));
+
+        JButton updateButton = new JButton("Update System");
+        updateButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                updateSystem();
+                displaySystemStatus();
+            }
+        });
+
+        statusLabel = new JLabel("System Status: ");
+        panel.add(new JLabel("Solar Panel Power Output: "));
+        panel.add(new JLabel("Wind Turbine Power Output: "));
+        panel.add(new JLabel("Energy Storage: "));
+        panel.add(updateButton);
+        panel.add(statusLabel);
+
+        frame.add(panel, BorderLayout.CENTER);
+        frame.setSize(400, 150);
+        frame.setVisible(true);
+    }
+
+    private static void updateSystem() {
+        // Simulate environmental data
+        EnvironmentalData environmentalData = generateEnvironmentalData();
+
+        // Update power output based on environmental conditions
+        solarPanel.updatePowerOutput(environmentalData.getSunlightIntensity());
+        windTurbine.updatePowerOutput(environmentalData.getWindSpeed());
+
+        // Perform energy prediction, optimization, and storage management
+        performEnergyPrediction(solarPanel, windTurbine);
+        performEnergyOptimization(solarPanel, windTurbine, energyStorage);
+    }
+
+    private static void displaySystemStatus() {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                statusLabel.setText("System Status: "
+                        + "Solar Panel Power Output: " + solarPanel.getCurrentPowerOutput() + " kW, "
+                        + "Wind Turbine Power Output: " + windTurbine.getCurrentPowerOutput() + " kW, "
+                        + "Energy Storage: " + energyStorage.getStoredEnergy() + " kWh");
+            }
+        });
+    }
+
+    // Method to simulate generating environmental data
+    private static EnvironmentalData generateEnvironmentalData() {
+        Random random = new Random();
+        double sunlightIntensity = random.nextDouble(); // Simulated sunlight intensity between 0 and 1
+        double windSpeed = random.nextDouble() * 10.0; // Simulated wind speed between 0 and 10 m/s
+
+        return new EnvironmentalData(sunlightIntensity, windSpeed);
+    }
+
+    // Placeholder method for energy prediction (to be implemented)
+    private static void performEnergyPrediction(SolarPanel solarPanel, WindTurbine windTurbine) {
+        // Placeholder implementation
+        System.out.println("Performing energy prediction...");
+    }
+
+    // Placeholder method for energy optimization (to be implemented)
+    private static void performEnergyOptimization(SolarPanel solarPanel, WindTurbine windTurbine, EnergyStorage energyStorage) {
+        // Placeholder implementation
+        System.out.println("Performing energy optimization...");
+
+        // Simulate storing excess energy in the storage
+        double totalPowerOutput = solarPanel.getCurrentPowerOutput() + windTurbine.getCurrentPowerOutput();
+        double excessEnergy = Math.max(0, totalPowerOutput - energyStorage.getStoredEnergy());
+        energyStorage.storeEnergy(excessEnergy);
+
+        // Simulate consuming stored energy for system needs
+        double systemConsumption = 150.0; // Placeholder value for system consumption
+        energyStorage.consumeEnergy(systemConsumption);
+    }
+}
